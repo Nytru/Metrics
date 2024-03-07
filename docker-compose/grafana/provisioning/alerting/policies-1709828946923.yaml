@@ -1,0 +1,85 @@
+apiVersion: 1
+policies:
+    - orgId: 1
+      receiver: grafana-default-email
+      group_by:
+        - grafana_folder
+        - alertname
+      routes:
+        - receiver: webhook
+          object_matchers:
+            - - type
+              - =
+              - temperature
+          group_wait: 1m
+          group_interval: 1m
+          repeat_interval: 1m
+contactPoints:
+  - orgId: 1
+    name: webhook
+    receivers:
+      - uid: a6fbfac2-e35d-4182-9102-a34912863d57
+        type: webhook
+        settings:
+          password: admin
+          url: http://host.docker.internal:5212/webhook/200
+        disableResolveMessage: false
+groups:
+  - orgId: 1
+    name: temperature
+    folder: rules
+    interval: 10s
+    rules:
+      - uid: d7d86c42-3244-4c6b-b37e-48be8115f440
+        title: Temperature
+        condition: C
+        data:
+          - refId: Temperature
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: PBFA97CFB590B2093
+            model:
+              editorMode: code
+              expr: temperature
+              instant: true
+              intervalMs: 1000
+              legendFormat: __auto
+              maxDataPoints: 43200
+              range: false
+              refId: Temperature
+          - refId: C
+            relativeTimeRange:
+              from: 600
+              to: 0
+            datasourceUid: __expr__
+            model:
+              conditions:
+                - evaluator:
+                    params:
+                      - 1
+                    type: gt
+                  operator:
+                    type: and
+                  query:
+                    params:
+                      - C
+                  reducer:
+                    params: []
+                    type: last
+                  type: query
+              datasource:
+                type: __expr__
+                uid: __expr__
+              expression: Temperature
+              intervalMs: 1000
+              maxDataPoints: 43200
+              refId: C
+              type: threshold
+        noDataState: NoData
+        execErrState: Error
+        for: 30s
+        annotations: {}
+        labels:
+          type: temperature
+        isPaused: false
