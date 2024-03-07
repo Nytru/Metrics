@@ -1,29 +1,63 @@
+import time
 import uvicorn
 import psutil
+import os
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
-
 
 app = FastAPI()
 
 
+def get_disk_memory() -> (float, float):
+    result = os.statvfs('/')
+    block_size = result.f_frsize
+    total_blocks = result.f_blocks
+    free_blocks = result.f_bfree
+    giga = 1024 * 1024
+    # giga = 1000 * 1000 * 1000
+    total_size = total_blocks * block_size / giga
+    free_size = free_blocks * block_size / giga
+    return total_size, free_size
+
+
+def get_ram_memory() -> (float, float):
+    mem = psutil.virtual_memory()
+    total = mem.total / 1024 / 1024
+    free = (mem.available - mem.inactive) / 1024 / 1024
+    return total, free
+
+
 def get_metrics():
-    cpu_freq = 4
-    gpu_freq = 3
     cpu_temp = 1
+    gpu_freq = 3
     gpu_temp = 2
+
+    memory_total_ram, memory_available_ram = get_ram_memory()
+    memory_total_disk, memory_available_disk = get_disk_memory()
+
     text = '# HELP temperature Current element temperature.\n'
     text += '# TYPE temperature gauge\n'
     text += 'temperature{target=\"CPU\"} ' + f'{cpu_temp}\n'
     text += 'temperature{target=\"GPU\"} ' + f'{gpu_temp}\n'
-    text += '# HELP speed Represents current elements speed.\n'
-    text += '# TYPE speed gauge\n'
-    text += 'speed{target=\"CPU\"} ' + f'{cpu_freq}\n'
-    text += 'speed{target=\"GPU\"} ' + f'{gpu_freq}\n'
-    text += '# HELP memory Represents available memory.\n'
-    text += '# TYPE memory gauge\n'
-    text += 'memory{target=\"RAM\"} ' + f'{0}\n'
-    text += 'memory{target=\"DISK\"} ' + f'{0}'
+
+    text += '# HELP percent_usage Represents current elements usage in %.\n'
+    text += '# TYPE percent_usage gauge\n'
+    cores = psutil.cpu_percent(percpu=True)
+    i = 0
+    for core in cores:
+        text += 'percent_usage{target=\"CPU\",' + f'core=\"{i}\"' + '} ' + f'{core}\n'
+        i += 1
+    text += 'percent_usage{target=\"GPU\"} ' + f'{gpu_freq}\n'
+
+    text += '# HELP memory_total Represents total memory.\n'
+    text += '# TYPE memory_total gauge\n'
+    text += 'memory_total{target=\"RAM\"} ' + f'{memory_total_ram}\n'
+    text += 'memory_total{target=\"DISK\"} ' + f'{memory_total_disk}\n'
+
+    text += '# HELP memory_available Represents available memory.\n'
+    text += '# TYPE memory_available gauge\n'
+    text += 'memory_available{target=\"RAM\"} ' + f'{memory_available_ram}\n'
+    text += 'memory_available{target=\"DISK\"} ' + f'{memory_available_disk}'
     return text
 
 
@@ -33,5 +67,13 @@ def read_root():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="127.0.0.1", port=5213)
+    # uvicorn.run(app, host="127.0.0.1", port=5213)
+    while(True):
+        cores = psutil.cpu_percent(percpu=True)
+        i = 1
+        for core in cores:
+            print(f'{i}: {core}')
+            i += 1
+        time.sleep(1)
+        os.system('clear')
 
