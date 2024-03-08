@@ -1,4 +1,3 @@
-import time
 import uvicorn
 import psutil
 import os
@@ -63,17 +62,16 @@ def get_metrics():
 
 @app.get("/metrics", response_class=PlainTextResponse)
 def read_root():
+    r = psutil.virtual_memory()
+    print(f'total: {r.total / 1024 / 1024}')
+    print(f'used: {r.used / 1024 / 1024}')
+    print(f'available: {r.available / 1024 / 1024}')
+    print(f'inactive: {r.inactive / 1024 / 1024}')
+    print(f'percent: {r.percent}')
+    print(f'free: {r.free / 1024 / 1024}')
+    print(f'active: {r.active / 1024 / 1024}')
     return get_metrics()
 
 
 if __name__ == "__main__":
-    # uvicorn.run(app, host="127.0.0.1", port=5213)
-    while(True):
-        cores = psutil.cpu_percent(percpu=True)
-        i = 1
-        for core in cores:
-            print(f'{i}: {core}')
-            i += 1
-        time.sleep(1)
-        os.system('clear')
-
+    uvicorn.run(app, host="127.0.0.1", port=5213)

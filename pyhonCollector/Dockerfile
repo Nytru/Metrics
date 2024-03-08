@@ -17,5 +17,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 EXPOSE 5213
 
 # Command to run the FastAPI app using uvicorn
-#CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5213"]
-CMD ["python3", "main.py"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5213"]
+#CMD ["python3", "main.py"]

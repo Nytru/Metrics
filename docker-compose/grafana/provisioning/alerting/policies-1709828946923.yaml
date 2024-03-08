@@ -1,29 +1,4 @@
 apiVersion: 1
-policies:
-    - orgId: 1
-      receiver: grafana-default-email
-      group_by:
-        - grafana_folder
-        - alertname
-      routes:
-        - receiver: webhook
-          object_matchers:
-            - - type
-              - =
-              - temperature
-          group_wait: 1m
-          group_interval: 1m
-          repeat_interval: 1m
-contactPoints:
-  - orgId: 1
-    name: webhook
-    receivers:
-      - uid: a6fbfac2-e35d-4182-9102-a34912863d57
-        type: webhook
-        settings:
-          password: admin
-          url: http://host.docker.internal:5212/webhook/200
-        disableResolveMessage: false
 groups:
   - orgId: 1
     name: temperature
@@ -76,6 +51,8 @@ groups:
               maxDataPoints: 43200
               refId: C
               type: threshold
+        dashboardUid: ""
+        panelId: 0
         noDataState: NoData
         execErrState: Error
         for: 30s
@@ -83,3 +60,28 @@ groups:
         labels:
           type: temperature
         isPaused: false
+contactPoints:
+  - orgId: 1
+    name: webhook
+    receivers:
+      - uid: a6fbfac2-e35d-4182-9102-a34912863d57
+        type: webhook
+        settings:
+          password: admin
+          url: http://host.docker.internal:5212/webhook/200
+        disableResolveMessage: false
+policies:
+  - orgId: 1
+    receiver: grafana-default-email
+    group_by:
+      - grafana_folder
+      - alertname
+    routes:
+      - receiver: webhook
+        object_matchers:
+          - - type
+            - =
+            - temperature
+        group_wait: 1m
+        group_interval: 1m
+        repeat_interval: 1m
