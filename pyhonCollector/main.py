@@ -3,6 +3,7 @@ import psutil
 import os
 from fastapi import FastAPI
 from fastapi.responses import PlainTextResponse
+import subprocess
 
 app = FastAPI()
 
@@ -62,16 +63,29 @@ def get_metrics():
 
 @app.get("/metrics", response_class=PlainTextResponse)
 def read_root():
-    r = psutil.virtual_memory()
-    print(f'total: {r.total / 1024 / 1024}')
-    print(f'used: {r.used / 1024 / 1024}')
-    print(f'available: {r.available / 1024 / 1024}')
-    print(f'inactive: {r.inactive / 1024 / 1024}')
-    print(f'percent: {r.percent}')
-    print(f'free: {r.free / 1024 / 1024}')
-    print(f'active: {r.active / 1024 / 1024}')
+    # r = psutil.virtual_memory()
+    # print(f'total: {r.total / 1024 / 1024}')
+    # print(f'used: {r.used / 1024 / 1024}')
+    # print(f'available: {r.available / 1024 / 1024}')
+    # print(f'inactive: {r.inactive / 1024 / 1024}')
+    # print(f'percent: {r.percent}')
+    # print(f'free: {r.free / 1024 / 1024}')
+    # print(f'active: {r.active / 1024 / 1024}')
     return get_metrics()
 
 
 if __name__ == "__main__":
     uvicorn.run(app, host="127.0.0.1", port=5213)
+#     import subprocess
+# 
+#     # Command to execute
+#     command = "docker stats --no-stream --format json"
+# 
+#     # Execute the command and capture the output
+#     output = subprocess.check_output(command, shell=True)
+
+    # Print the output
+    # print(output.decode("utf-8"))
+    # # Command to execute
+    # with open("ss.txt", "w") as outfile:
+    #     subprocess.call("docker stats --no-stream", shell=True, stdout=outfile)
