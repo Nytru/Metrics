@@ -84,8 +84,8 @@ services:
       - '--path.rootfs=/rootfs'
       - '--path.sysfs=/host/sys'
       - '--collector.filesystem.mount-points-exclude=^/(sys|proc|dev|host|etc)($$|/)'
-    ports:
-      - "9100:9100"
+    expose:
+      - "9100"
     networks:
       - monitoring
 
@@ -102,8 +102,8 @@ services:
       - '--web.console.libraries=/etc/prometheus/console_libraries'
       - '--web.console.templates=/etc/prometheus/consoles'
       - '--web.enable-lifecycle'
-    ports:
-      - "9090:9090"
+    expose:
+      - "9090"
     networks:
       - monitoring
         
@@ -116,7 +116,9 @@ services:
     env_file:
       - ./grafana/config.monitoring
     restart: unless-stopped
-    
+    networks:
+      - monitoring
+  
   worker:
     build:
       context: ../PrometheusGrafanaTry
@@ -124,15 +126,15 @@ services:
     image: worker_grafana_prom
     environment:
       - ASPNETCORE_HTTP_PORTS=5212
-    ports:
-      - "5212:5212"
+    expose:
+      - "5212"
     networks:
       - monitoring
         
   alertmanager:
     image: prom/alertmanager
-    ports:
-      - "9093:9093"
+    expose:
+      - "9093"
     volumes:
       - ./alertmanager/:/etc/alertmanager/
     restart: unless-stopped
@@ -146,16 +148,16 @@ services:
       dockerfile: Dockerfile
     image: python_collector
     restart: unless-stopped
-    ports:
-      - "5213:5213"
+    expose:
+      - "5213"
     networks:
       - monitoring
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
     command: -enable_metrics app,cpu,cpuLoad,cpuset,disk,memory,perf_event,process
-    ports:
-      - "8080:8080"
+    expose:
+      - "8080"
     volumes:
       - /:/rootfs:ro
       - /var/run/docker.sock:/var/run/docker.sock:rw
