@@ -113,6 +113,8 @@ services:
       - "3000:3000"
     volumes:
       - ./grafana/provisioning/:/etc/grafana/provisioning/
+    env_file:
+      - ./grafana/config.monitoring
     restart: unless-stopped
     
   worker:
@@ -146,5 +148,21 @@ services:
     restart: unless-stopped
     ports:
       - "5213:5213"
+    networks:
+      - monitoring
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:v0.47.2
+    command: 
+      - '-enable_metrics'
+      - 'process'
+      - 'cpu'
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
     networks:
       - monitoring
