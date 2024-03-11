@@ -153,10 +153,7 @@ services:
 
   cadvisor:
     image: gcr.io/cadvisor/cadvisor:v0.47.2
-    command: 
-      - '-enable_metrics'
-      - 'process'
-      - 'cpu'
+    command: -enable_metrics app,cpu,cpuLoad,cpuset,disk,memory,perf_event,process
     ports:
       - "8080:8080"
     volumes:
