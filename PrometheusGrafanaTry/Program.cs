@@ -42,7 +42,7 @@ app.MapPost("webhook", () =>
     var dockerStats = ExecuteCommand("docker stats --no-stream");
     var dockerPs = ExecuteCommand("docker ps");
     using var stream = File.AppendText($"{DateTime.Today:dd-MM-yyyy}.log");
-    stream.Write($"-------------------------\n{DateTime.UtcNow}\n");
+    stream.Write($"-------------------------\n{DateTime.UtcNow:O}\n");
     stream.Write(dockerStats);
     stream.Write("#########################\n");
     stream.Write(dockerPs);
