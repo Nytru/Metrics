@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using PrometheusGrafanaTry.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,10 +37,36 @@ app.MapPost("/work/{state:bool}", (bool state, HardWorkService service) =>
 
 app.MapGet("metrics", (MetricService service) => service.GetMetrics());
 
-app.MapPost("webhook/{value:int}", (int value) =>
+app.MapPost("webhook", () =>
 {
-    Console.WriteLine($"DateTime: {DateTime.Now}, got request");
-    return value;
+    var dockerStats = ExecuteCommand("docker stats --no-stream");
+    var dockerPs = ExecuteCommand("docker ps");
+    using var stream = File.AppendText($"{DateTime.Today:dd-MM-yyyy}.log");
+    stream.Write($"-------------------------\n{DateTime.UtcNow}\n");
+    stream.Write(dockerStats);
+    stream.Write("#########################\n");
+    stream.Write(dockerPs);
 });
 
 app.Run();
+return;
+
+
+string ExecuteCommand(string command)
+{
+
+    var psi = new ProcessStartInfo("/bin/bash", $"-c \"{command}\"")
+    {
+        RedirectStandardOutput = true,
+        UseShellExecute = false,
+        CreateNoWindow = true
+    };
+
+    var process = new Process();
+    process.StartInfo = psi;
+    process.Start();
+
+    var output = process.StandardOutput.ReadToEnd();
+    process.WaitForExit();
+    return output;
+}

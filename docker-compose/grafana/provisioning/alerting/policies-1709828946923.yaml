@@ -68,7 +68,7 @@ contactPoints:
         type: webhook
         settings:
           password: admin
-          url: http://host.docker.internal:5212/webhook/200
+          url: http://host.docker.internal:5212/webhook
         disableResolveMessage: false
 policies:
   - orgId: 1
